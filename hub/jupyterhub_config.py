@@ -1,6 +1,10 @@
-import os
+def pre_spawn_hook(spawner):
+    spawner.env["HADOOP_USER_NAME"] = spawner.user.name
+    spawner.env["NB_USER"] = spawner.user.name
+    spawner.env["GRANT_SUDO"] = "1"
+    spawner.env["CHOWN_HOME"] = "1"
+    spawner.env["CHOWN_HOME_OPTS"] = "-R"
 
-# print(os.environ)
 
 c = get_config()  # noqa
 
@@ -16,19 +20,21 @@ c.JupyterHub.hub_ip = "0.0.0.0"
 # this is usually the hub container's name
 c.JupyterHub.hub_connect_ip = "jupyterhub"
 
-c.JupyterHub.db_url = "mysql+pymysql://root:root@db/jupyterhub"
+c.JupyterHub.db_url = "mysql+pymysql://root:root@db:3306/jupyterhub"
 
 # do not delete containers if hub restarts
 
 c.JupyterHub.cleanup_servers = False
 
 # volumes
-notebook_dir = os.environ.get("DOCKER_NOTEBOOK_DIR") or "/home/jovyan/work"
-c.DockerSpawner.notebook_dir = notebook_dir
+NOTEBOOK_DIR = "/home/{username}"
+
+c.DockerSpawner.notebook_dir = NOTEBOOK_DIR
+c.CustomDockerSpawner.pre_spawn_hook = pre_spawn_hook
 
 # Mount the real user's Docker volume on the host to the notebook user's
 # notebook directory in the container
-c.DockerSpawner.volumes = {"jupyterhub-user-{username}": notebook_dir}
+c.DockerSpawner.volumes = {"/home/{username}": NOTEBOOK_DIR}
 
 # pick a docker image. This should have the same version of jupyterhub
 # in it as our Hub.

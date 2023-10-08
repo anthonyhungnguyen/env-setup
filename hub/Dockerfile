@@ -1,9 +1,5 @@
 FROM jupyterhub/jupyterhub:latest
 
-RUN echo "Acquire::http::Pipeline-Depth 0;" > /etc/apt/apt.conf.d/99custom && \
-  echo "Acquire::http::No-Cache true;" >> /etc/apt/apt.conf.d/99custom && \
-  echo "Acquire::BrokenProxy    true;" >> /etc/apt/apt.conf.d/99custom
-
 RUN apt-get update \
   && apt-get upgrade -y \
   && apt-get install -y gcc default-libmysqlclient-dev pkg-config python3-dev python3-pymysql\
